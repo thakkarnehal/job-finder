@@ -24,6 +24,22 @@ jobs:
       - name: Install Playwright browser
         run: playwright install --with-deps chromium
 
+      - name: Test OpenAI connectivity
+        env:
+          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+        run: |
+          python -c "
+          import os, httpx
+          api_key = os.environ.get('OPENAI_API_KEY', 'NOT_SET')
+          print(f'API key present: {bool(api_key) and api_key != \"NOT_SET\"}')
+          print(f'API key prefix: {api_key[:15]}...')
+          try:
+              r = httpx.get('https://api.openai.com', timeout=10)
+              print(f'OpenAI reachable: {r.status_code}')
+          except Exception as e:
+              print(f'OpenAI NOT reachable: {e}')
+          "
+
       - name: Run pipeline
         env:
           OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
