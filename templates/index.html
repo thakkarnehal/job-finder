@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Job Finder</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      background: #f4f6f9;
+      color: #1a1a1a;
+      padding: 2rem;
+    }
+
+    h1 {
+      font-size: 1.6rem;
+      margin-bottom: 1.5rem;
+      color: #111;
+    }
+
+    .job-count {
+      font-size: 0.9rem;
+      color: #666;
+      margin-bottom: 1.5rem;
+    }
+
+    .card {
+      background: white;
+      border-radius: 10px;
+      padding: 1.25rem 1.5rem;
+      margin-bottom: 1rem;
+      box-shadow: 0 1px 4px rgba(0,0,0,0.08);
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      gap: 1rem;
+      transition: opacity 0.2s;
+    }
+
+    .card.applied {
+      opacity: 0.45;
+    }
+
+    .card-left {
+      flex: 1;
+    }
+
+    .card-header {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      margin-bottom: 0.4rem;
+      flex-wrap: wrap;
+    }
+
+    .title {
+      font-size: 1rem;
+      font-weight: 600;
+    }
+
+    .company {
+      font-size: 0.85rem;
+      color: #555;
+    }
+
+    .score-badge {
+      font-size: 0.8rem;
+      font-weight: 700;
+      padding: 0.2rem 0.55rem;
+      border-radius: 20px;
+      white-space: nowrap;
+    }
+
+    .score-high   { background: #d1fae5; color: #065f46; }
+    .score-mid    { background: #fef3c7; color: #92400e; }
+    .score-low    { background: #fee2e2; color: #991b1b; }
+    .score-none   { background: #e5e7eb; color: #6b7280; }
+
+    .location {
+      font-size: 0.8rem;
+      color: #888;
+      margin-bottom: 0.5rem;
+    }
+
+    .summary {
+      font-size: 0.875rem;
+      color: #444;
+      line-height: 1.5;
+    }
+
+    .card-right {
+      display: flex;
+      flex-direction: column;
+      align-items: flex-end;
+      gap: 0.75rem;
+      min-width: 120px;
+    }
+
+    .apply-btn {
+      background: #2563eb;
+      color: white;
+      border: none;
+      padding: 0.45rem 1rem;
+      border-radius: 6px;
+      font-size: 0.85rem;
+      cursor: pointer;
+      text-decoration: none;
+      white-space: nowrap;
+    }
+
+    .apply-btn:hover { background: #1d4ed8; }
+
+    .applied-label {
+      display: flex;
+      align-items: center;
+      gap: 0.4rem;
+      font-size: 0.8rem;
+      color: #555;
+      cursor: pointer;
+      white-space: nowrap;
+    }
+
+    .applied-label input { cursor: pointer; }
+
+    .date {
+      font-size: 0.75rem;
+      color: #aaa;
+    }
+
+    .no-jobs {
+      text-align: center;
+      color: #888;
+      margin-top: 4rem;
+      font-size: 1rem;
+    }
+  </style>
+</head>
+<body>
+
+  <h1>Job Finder</h1>
+
+  {% if jobs %}
+    <p class="job-count">{{ jobs | length }} job{{ 's' if jobs | length != 1 }} found</p>
+
+    {% for job in jobs %}
+      {% if job.score is not none %}
+        {% if job.score >= 7 %}
+          {% set badge = "score-high" %}
+        {% elif job.score >= 4 %}
+          {% set badge = "score-mid" %}
+        {% else %}
+          {% set badge = "score-low" %}
+        {% endif %}
+      {% else %}
+        {% set badge = "score-none" %}
+      {% endif %}
+
+      <div class="card {% if job.applied %}applied{% endif %}" id="card-{{ job.id }}">
+        <div class="card-left">
+          <div class="card-header">
+            <span class="title">{{ job.title }}</span>
+            <span class="company">{{ job.company }}</span>
+            <span class="score-badge {{ badge }}">
+              {% if job.score is not none %}{{ job.score }}/10{% else %}Unscored{% endif %}
+            </span>
+          </div>
+          {% if job.location %}
+            <div class="location">{{ job.location }}</div>
+          {% endif %}
+          {% if job.summary %}
+            <div class="summary">{{ job.summary }}</div>
+          {% endif %}
+        </div>
+
+        <div class="card-right">
+          <a class="apply-btn" href="{{ job.url }}" target="_blank" rel="noopener">Apply</a>
+          <label class="applied-label">
+            <input
+              type="checkbox"
+              onchange="markApplied({{ job.id }}, this.checked)"
+              {% if job.applied %}checked{% endif %}
+            >
+            Applied
+          </label>
+          <span class="date">{{ job.date_found }}</span>
+        </div>
+      </div>
+    {% endfor %}
+
+  {% else %}
+    <p class="no-jobs">No jobs yet. Run <code>scraper.py</code> to get started.</p>
+  {% endif %}
+
+  <script>
+    function markApplied(jobId, applied) {
+      fetch("/apply", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ id: jobId, applied: applied })
+      });
+      const card = document.getElementById("card-" + jobId);
+      if (applied) card.classList.add("applied");
+      else card.classList.remove("applied");
+    }
+  </script>
+
+</body>
+</html>

@@ -1,0 +1,49 @@
+NEHAL THAKKAR
+EDUCATION
+Rutgers University, Rutgers School of Arts and Sciences - New Brunswick, NJ Bachelor of Science in Computer Science Certificate in Data Science
+Honors: Rutgers Honors Program, Dean’s List (Fall 2020-Spring 2024)
+Yonsei University, South Korea, Study Abroad 
+May 2024
+GPA: 3.89
+WORK EXPERIENCE
+Fall 2023
+JP Morgan Chase & Co AI & Data Science Analyst Newark, DE
+September 2024-Present
+▪ Conducted statistical analyses for anomaly detection across diverse datasets, including derivatives and sub-ledger data,
+driving enhanced monitoring and operational efficiency
+▪ Diagnosed critical data quality issue in OTC datasets, proposing a scalable workflow in Databricks utilizing Python and
+SQL to be adaptable across several models
+▪ Performed exploratory analysis and collaborated with a team of 4 on a proposal for clear product recommendations on
+new NLP and LLM technologies to democratize data analytics, presenting strategic insights to senior management
+AI & Data Science Summer Analyst June 2023-August 2023
+▪ Designed an outlier detection system using 6+ ML algorithms and statistical methods in python to detect time series
+anomalies in 900M+ daily contract derivative notional value records
+▪ Developed a Jupyter notebook-based codebase for error handling, cutting manual work by 75% and paving the way for
+potential automated error correction
+▪ Deployed 5 scalable and time-sensitive workflows in Alteryx to validate the performance of a new data pipeline
+Verizon Basking Ridge, NJ
+Data Science Intern June 2022 - August 2022
+▪ Applied ML models in Python to implement hierarchal clustering on 100K wireless KPI data records using binary and
+multi-class classification, creating fast detection of 5+ antenna issues with 84% issue classification accuracy
+▪ Identified manual labeling errors through data analysis utilizing machine learning algorithms to strengthen the dataset
+▪ Moderated a 4-person executive leadership panel for 20 interns focused on career advancement and opportunities
+Rutgers University Interdisciplinary Research Team Research Intern New Brunswick, NJ
+September 2021 - May 2022
+▪ Extracted data from 10+ nested web pages in Python to leverage Urllib and BeautifulSoup
+▪ Created 10 tables after cleaning extracted data to upload on MySQL workbench utilized across additional project teams
+▪ Collaborated efficiently with 6 team members by delegating tasks to build a conversational AI system
+Innovative Defense Technologies Virtual, VA
+Software Engineer Intern May 2021 - August 2021
+▪ Utilized debugging methods across 4 languages to devise optimal solutions and push product-ready code for backend
+capabilities and demonstrated the functionality of application to clientele
+▪ Resolved gaps in Postgres databases across 100+ tables by developing SQL queries independently
+▪ Onboarded 3 new project team members on system protocols and best practices
+LEADERSHIP
+Rutgers University Raas and Garba Association September 2020 - Spring 2023
+Secretary New Brunswick, NJ
+▪ Managed registration logistics, vendor deadlines, and team travel for 25 people for 5 national dance competitions
+▪ Trained 20+ hours a week with a diverse team to compete nationally against 20 collegiate dance teams
+SKILLS & INTERESTS
+▪ Programming Languages: Java, Python, SQL, R, HTML, CSS, JavaScript, C#, C
+▪ Misc. Technologies: JupyterLab, Android Studio, Google Firebase, Github, MySQL Workbench, Linux, Eclipse
+▪ Skills: Data Science, Data Analytics, Software Engineering, Communication, Leadership, Problem Solving
