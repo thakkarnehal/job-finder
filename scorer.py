@@ -1,5 +1,6 @@
 import json
 import os
+import time
 
 from dotenv import load_dotenv
 from openai import OpenAI
@@ -8,7 +9,11 @@ from database import get_unscored_jobs, update_score
 
 load_dotenv()
 
-client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
+api_key = os.getenv("OPENAI_API_KEY")
+if not api_key:
+    raise RuntimeError("OPENAI_API_KEY is not set. Add it to .env or GitHub Actions secrets.")
+
+client = OpenAI(api_key=api_key, timeout=60.0, max_retries=3)
 
 RESUME_PATH = "resume.txt"
 
@@ -78,6 +83,7 @@ def main():
             print(f"  Scored: {job['title']} at {job['company']} — {score}/10")
         except Exception as e:
             print(f"  ERROR scoring {job['title']} at {job['company']}: {e}")
+        time.sleep(0.3)  # avoid hitting rate limits
 
     print("\nDone.")
 
