@@ -9,7 +9,7 @@ from database import get_unscored_jobs, update_score
 
 load_dotenv()
 
-api_key = os.getenv("OPENAI_API_KEY")
+api_key = os.getenv("OPENAI_API_KEY", "").strip()
 if not api_key:
     raise RuntimeError("OPENAI_API_KEY is not set. Add it to .env or GitHub Actions secrets.")
 
