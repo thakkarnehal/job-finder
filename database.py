@@ -25,6 +25,12 @@ def init_db():
                 applied     INTEGER NOT NULL DEFAULT 0
             )
         """)
+        conn.execute("""
+            CREATE TABLE IF NOT EXISTS newsletters (
+                date     TEXT PRIMARY KEY,
+                content  TEXT NOT NULL
+            )
+        """)
         conn.commit()
 
 
@@ -92,6 +98,36 @@ def set_applied(job_id, applied):
         conn.execute(
             "UPDATE jobs SET applied = ? WHERE id = ?",
             (1 if applied else 0, job_id)
+        )
+        conn.commit()
+
+
+def get_jobs_today():
+    """Return all jobs found today."""
+    today = date.today().isoformat()
+    with get_connection() as conn:
+        conn.row_factory = sqlite3.Row
+        rows = conn.execute(
+            "SELECT * FROM jobs WHERE date_found = ?", (today,)
+        ).fetchall()
+    return [dict(row) for row in rows]
+
+
+def get_newsletter(date_str):
+    """Return cached newsletter content for a given date, or None."""
+    with get_connection() as conn:
+        row = conn.execute(
+            "SELECT content FROM newsletters WHERE date = ?", (date_str,)
+        ).fetchone()
+    return row[0] if row else None
+
+
+def save_newsletter(date_str, content):
+    """Cache newsletter content for a given date."""
+    with get_connection() as conn:
+        conn.execute(
+            "INSERT OR REPLACE INTO newsletters (date, content) VALUES (?, ?)",
+            (date_str, content),
         )
         conn.commit()
 

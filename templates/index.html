@@ -188,11 +188,37 @@
       margin-top: 2rem;
       font-size: 0.95rem;
     }
+
+    /* ── Tabs ── */
+    .tabs {
+      display: flex;
+      gap: 0.25rem;
+      margin-bottom: 1.5rem;
+      border-bottom: 2px solid #e5e7eb;
+    }
+
+    .tab {
+      padding: 0.5rem 1.25rem;
+      font-size: 0.9rem;
+      font-weight: 500;
+      color: #6b7280;
+      text-decoration: none;
+      border-bottom: 2px solid transparent;
+      margin-bottom: -2px;
+    }
+
+    .tab:hover { color: #1a1a1a; }
+    .tab.active { color: #2563eb; border-bottom-color: #2563eb; }
   </style>
 </head>
 <body>
 
   <h1>Job Finder</h1>
+
+  <nav class="tabs">
+    <a class="tab active" href="/">Jobs</a>
+    <a class="tab" href="/insights">Insights</a>
+  </nav>
 
   {% if jobs %}
 
