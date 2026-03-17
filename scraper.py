@@ -51,6 +51,87 @@ EXPERIENCE_RE = re.compile(
     re.IGNORECASE,
 )
 
+# Companies considered a clear step up from JPMorgan Chase for AI/DS roles.
+# Matching is case-insensitive substring — "Google LLC" matches "google".
+COMPANY_ALLOWLIST = {
+    # Big Tech
+    "google", "deepmind", "waymo",
+    "meta", "facebook",
+    "apple",
+    "amazon", "aws",
+    "microsoft",
+    "netflix",
+    "uber",
+    "airbnb",
+    "lyft",
+    "linkedin",
+    "salesforce",
+    "adobe",
+    "nvidia",
+    "amd",
+    "intel",
+    "qualcomm",
+    "spotify",
+    "snap", "snapchat",
+    "pinterest",
+    "doordash",
+    "instacart",
+    "shopify",
+    "bytedance", "tiktok",
+    "tesla",
+    "spacex",
+    # AI / ML labs
+    "openai",
+    "anthropic",
+    "cohere",
+    "mistral",
+    "scale ai",
+    "hugging face",
+    "stability ai",
+    "inflection",
+    "perplexity",
+    "together ai",
+    "xai",
+    # Data / Cloud / Dev tools
+    "snowflake",
+    "databricks",
+    "palantir",
+    "datadog",
+    "stripe",
+    "twilio",
+    "cloudflare",
+    "confluent",
+    "dbt labs",
+    "fivetran",
+    "mongodb",
+    "elastic",
+    "splunk",
+    "okta",
+    "crowdstrike",
+    "palo alto networks",
+    "zscaler",
+    "block", "square",
+    "robinhood",
+    "coinbase",
+    "asana",
+    "notion",
+    "figma",
+    "canva",
+    "servicenow",
+    "workday",
+    # Quant / HFT (strong ML culture, comp > JPM)
+    "two sigma",
+    "citadel",
+    "jane street",
+    "d.e. shaw", "de shaw",
+    "renaissance",
+    "optiver",
+    "tower research",
+    "hudson river trading",
+    "jump trading",
+    "virtu",
+}
+
 US_INDICATORS = [
     "us", "usa", "united states", "remote", "new york", "san francisco",
     "seattle", "chicago", "boston", "austin", "denver", "los angeles",
@@ -70,7 +151,15 @@ HEADERS = {
 # FILTERING (shared by all scrapers)
 # ──────────────────────────────────────────────
 
-def passes_filters(title, description, location):
+def is_reputable(company):
+    """Return True if the company is on the allowlist."""
+    c = company.lower()
+    return any(term in c for term in COMPANY_ALLOWLIST)
+
+
+def passes_filters(title, description, location, company=""):
+    if not is_reputable(company):
+        return False
     loc = location.lower()
     if not any(ind in loc for ind in US_INDICATORS):
         return False
@@ -99,7 +188,7 @@ def scrape_greenhouse(company_name, board_slug):
         title = j.get("title", "")
         location = j.get("location", {}).get("name", "")
         description = (j.get("content") or "")
-        if not passes_filters(title, description, location):
+        if not passes_filters(title, description, location, company_name):
             continue
         jobs.append({
             "title": title,
@@ -147,14 +236,15 @@ def scrape_linkedin(page):
                 location = location_el.inner_text().strip() if location_el else ""
                 job_url = link_el.get_attribute("href") if link_el else ""
 
+                company = company_el.inner_text().strip() if company_el else "Unknown"
                 if not title or not job_url or job_url in seen_urls:
                     continue
-                if not passes_filters(title, "", location):
+                if not passes_filters(title, "", location, company):
                     continue
                 seen_urls.add(job_url)
                 jobs.append({
                     "title": title,
-                    "company": company_el.inner_text().strip() if company_el else "Unknown",
+                    "company": company,
                     "url": job_url,
                     "location": location,
                     "date_posted": "",
@@ -197,14 +287,15 @@ def scrape_indeed(page):
                 href = link_el.get_attribute("href") if link_el else ""
                 job_url = "https://www.indeed.com" + href if href.startswith("/") else href
 
+                company = company_el.inner_text().strip() if company_el else "Unknown"
                 if not title or not job_url or job_url in seen_urls:
                     continue
-                if not passes_filters(title, "", location):
+                if not passes_filters(title, "", location, company):
                     continue
                 seen_urls.add(job_url)
                 jobs.append({
                     "title": title,
-                    "company": company_el.inner_text().strip() if company_el else "Unknown",
+                    "company": company,
                     "url": job_url,
                     "location": location,
                     "date_posted": "",
