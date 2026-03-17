@@ -99,6 +99,20 @@ def get_all_jobs():
     return [dict(row) for row in rows]
 
 
+def delete_job(job_id):
+    """Remove a job that failed post-scrape filtering."""
+    with get_connection() as conn:
+        conn.execute("DELETE FROM jobs WHERE id = ?", (job_id,))
+        conn.commit()
+
+
+def update_description(job_id, description):
+    """Store a fetched description so future runs don't need to re-fetch."""
+    with get_connection() as conn:
+        conn.execute("UPDATE jobs SET description = ? WHERE id = ?", (description, job_id))
+        conn.commit()
+
+
 def set_applied(job_id, applied):
     """Set the applied status for a job."""
     with get_connection() as conn:
