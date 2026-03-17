@@ -1,3 +1,5 @@
+import json
+import os
 import re
 import time
 from urllib.parse import urlparse, urlunparse
@@ -5,6 +7,22 @@ import requests
 from playwright.sync_api import sync_playwright
 from playwright_stealth import Stealth
 from database import init_db, save_job
+
+SEEN_JOBS_FILE = "seen_jobs.json"
+
+
+def load_seen_urls():
+    if os.path.exists(SEEN_JOBS_FILE):
+        with open(SEEN_JOBS_FILE) as f:
+            return set(json.load(f))
+    return set()
+
+
+def save_seen_urls(new_urls):
+    existing = load_seen_urls()
+    updated = sorted(existing | new_urls)
+    with open(SEEN_JOBS_FILE, "w") as f:
+        json.dump(updated, f, indent=2)
 
 # ──────────────────────────────────────────────
 # CONFIG
@@ -397,13 +415,19 @@ def main():
         browser.close()
 
     # ── Save results ─────────────────────────────
+    seen_urls = load_seen_urls()
+    new_jobs = [j for j in all_jobs if j["url"] not in seen_urls]
+    already_seen = len(all_jobs) - len(new_jobs)
+
     print(f"\n{'=' * 60}")
     print(f"TOTAL MATCHES: {len(all_jobs)} jobs across all sources")
+    print(f"  Already seen in previous runs: {already_seen}")
+    print(f"  New this run: {len(new_jobs)}")
     print(f"{'=' * 60}")
 
     saved = 0
     skipped = 0
-    for job in all_jobs:
+    for job in new_jobs:
         print_job(job)
         if save_job(job):
             saved += 1

@@ -5,30 +5,12 @@ main.py — runs the full pipeline:
   3. Email only jobs not seen in previous runs
 """
 
-import json
-import os
 import sys
 
-from scraper import main as run_scraper
+from scraper import main as run_scraper, load_seen_urls, save_seen_urls
 from scorer import main as run_scorer
 from emailer import send_digest
 from database import get_top_jobs_today
-
-SEEN_JOBS_FILE = "seen_jobs.json"
-
-
-def load_seen_urls():
-    if os.path.exists(SEEN_JOBS_FILE):
-        with open(SEEN_JOBS_FILE) as f:
-            return set(json.load(f))
-    return set()
-
-
-def save_seen_urls(new_urls):
-    existing = load_seen_urls()
-    updated = sorted(existing | new_urls)
-    with open(SEEN_JOBS_FILE, "w") as f:
-        json.dump(updated, f, indent=2)
 
 
 def main():
