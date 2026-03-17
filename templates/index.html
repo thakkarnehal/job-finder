@@ -16,16 +16,71 @@
 
     h1 {
       font-size: 1.6rem;
-      margin-bottom: 1.5rem;
+      margin-bottom: 1.25rem;
       color: #111;
     }
 
+    /* ── Filter bar ── */
+    .filters {
+      background: white;
+      border-radius: 10px;
+      padding: 1rem 1.25rem;
+      margin-bottom: 1.25rem;
+      box-shadow: 0 1px 4px rgba(0,0,0,0.08);
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.75rem;
+      align-items: center;
+    }
+
+    .filters input[type="text"] {
+      flex: 1;
+      min-width: 180px;
+      padding: 0.4rem 0.75rem;
+      border: 1px solid #d1d5db;
+      border-radius: 6px;
+      font-size: 0.875rem;
+      outline: none;
+    }
+
+    .filters input[type="text"]:focus {
+      border-color: #2563eb;
+    }
+
+    .filters select {
+      padding: 0.4rem 0.65rem;
+      border: 1px solid #d1d5db;
+      border-radius: 6px;
+      font-size: 0.875rem;
+      background: white;
+      cursor: pointer;
+      outline: none;
+    }
+
+    .filters select:focus {
+      border-color: #2563eb;
+    }
+
+    .filter-label {
+      font-size: 0.8rem;
+      color: #6b7280;
+      white-space: nowrap;
+    }
+
+    .filter-group {
+      display: flex;
+      align-items: center;
+      gap: 0.4rem;
+    }
+
+    /* ── Job count ── */
     .job-count {
       font-size: 0.9rem;
       color: #666;
-      margin-bottom: 1.5rem;
+      margin-bottom: 1.25rem;
     }
 
+    /* ── Cards ── */
     .card {
       background: white;
       border-radius: 10px;
@@ -39,13 +94,10 @@
       transition: opacity 0.2s;
     }
 
-    .card.applied {
-      opacity: 0.45;
-    }
+    .card.applied { opacity: 0.45; }
+    .card.hidden  { display: none; }
 
-    .card-left {
-      flex: 1;
-    }
+    .card-left { flex: 1; }
 
     .card-header {
       display: flex;
@@ -55,15 +107,8 @@
       flex-wrap: wrap;
     }
 
-    .title {
-      font-size: 1rem;
-      font-weight: 600;
-    }
-
-    .company {
-      font-size: 0.85rem;
-      color: #555;
-    }
+    .title    { font-size: 1rem; font-weight: 600; }
+    .company  { font-size: 0.85rem; color: #555; }
 
     .score-badge {
       font-size: 0.8rem;
@@ -73,10 +118,10 @@
       white-space: nowrap;
     }
 
-    .score-high   { background: #d1fae5; color: #065f46; }
-    .score-mid    { background: #fef3c7; color: #92400e; }
-    .score-low    { background: #fee2e2; color: #991b1b; }
-    .score-none   { background: #e5e7eb; color: #6b7280; }
+    .score-high { background: #d1fae5; color: #065f46; }
+    .score-mid  { background: #fef3c7; color: #92400e; }
+    .score-low  { background: #fee2e2; color: #991b1b; }
+    .score-none { background: #e5e7eb; color: #6b7280; }
 
     .location {
       font-size: 0.8rem;
@@ -135,6 +180,14 @@
       margin-top: 4rem;
       font-size: 1rem;
     }
+
+    #no-results {
+      display: none;
+      text-align: center;
+      color: #888;
+      margin-top: 2rem;
+      font-size: 0.95rem;
+    }
   </style>
 </head>
 <body>
@@ -142,22 +195,66 @@
   <h1>Job Finder</h1>
 
   {% if jobs %}
-    <p class="job-count">{{ jobs | length }} job{{ 's' if jobs | length != 1 }} found</p>
+
+    <div class="filters">
+      <input type="text" id="search" placeholder="Search title or company…" oninput="applyFilters()">
+
+      <div class="filter-group">
+        <span class="filter-label">Score</span>
+        <select id="score-filter" onchange="applyFilters()">
+          <option value="all">All</option>
+          <option value="high">7+ (High)</option>
+          <option value="mid">4–6 (Mid)</option>
+          <option value="low">1–3 (Low)</option>
+          <option value="none">Unscored</option>
+        </select>
+      </div>
+
+      <div class="filter-group">
+        <span class="filter-label">Status</span>
+        <select id="applied-filter" onchange="applyFilters()">
+          <option value="all">All</option>
+          <option value="pending">Not applied</option>
+          <option value="applied">Applied</option>
+        </select>
+      </div>
+
+      <div class="filter-group">
+        <span class="filter-label">Scraped</span>
+        <select id="date-filter" onchange="applyFilters()">
+          <option value="all">All time</option>
+          <option value="today">Today</option>
+          <option value="week">This week</option>
+        </select>
+      </div>
+    </div>
+
+    <p class="job-count" id="job-count">{{ jobs | length }} job{{ 's' if jobs | length != 1 }}</p>
 
     {% for job in jobs %}
       {% if job.score is not none %}
         {% if job.score >= 7 %}
           {% set badge = "score-high" %}
+          {% set score_tier = "high" %}
         {% elif job.score >= 4 %}
           {% set badge = "score-mid" %}
+          {% set score_tier = "mid" %}
         {% else %}
           {% set badge = "score-low" %}
+          {% set score_tier = "low" %}
         {% endif %}
       {% else %}
         {% set badge = "score-none" %}
+        {% set score_tier = "none" %}
       {% endif %}
 
-      <div class="card {% if job.applied %}applied{% endif %}" id="card-{{ job.id }}">
+      <div class="card {% if job.applied %}applied{% endif %}"
+           id="card-{{ job.id }}"
+           data-score-tier="{{ score_tier }}"
+           data-applied="{{ 'yes' if job.applied else 'no' }}"
+           data-date="{{ job.date_found }}"
+           data-search="{{ (job.title ~ ' ' ~ job.company) | lower }}">
+
         <div class="card-left">
           <div class="card-header">
             <span class="title">{{ job.title }}</span>
@@ -189,11 +286,47 @@
       </div>
     {% endfor %}
 
+    <p id="no-results">No jobs match your filters.</p>
+
   {% else %}
     <p class="no-jobs">No jobs yet. Run <code>scraper.py</code> to get started.</p>
   {% endif %}
 
   <script>
+    const today = new Date().toISOString().slice(0, 10);
+    const weekAgo = new Date(Date.now() - 7 * 86400000).toISOString().slice(0, 10);
+
+    function applyFilters() {
+      const search  = document.getElementById("search").value.toLowerCase();
+      const score   = document.getElementById("score-filter").value;
+      const applied = document.getElementById("applied-filter").value;
+      const date    = document.getElementById("date-filter").value;
+
+      const cards = document.querySelectorAll(".card");
+      let visible = 0;
+
+      cards.forEach(card => {
+        const matchSearch  = !search || card.dataset.search.includes(search);
+        const matchScore   = score === "all" || card.dataset.scoreTier === score;
+        const matchApplied = applied === "all"
+          || (applied === "pending" && card.dataset.applied === "no")
+          || (applied === "applied" && card.dataset.applied === "yes");
+        const cardDate = card.dataset.date;
+        const matchDate    = date === "all"
+          || (date === "today" && cardDate === today)
+          || (date === "week"  && cardDate >= weekAgo);
+
+        const show = matchSearch && matchScore && matchApplied && matchDate;
+        card.classList.toggle("hidden", !show);
+        if (show) visible++;
+      });
+
+      document.getElementById("job-count").textContent =
+        visible + " job" + (visible !== 1 ? "s" : "");
+      document.getElementById("no-results").style.display =
+        visible === 0 ? "block" : "none";
+    }
+
     function markApplied(jobId, applied) {
       fetch("/apply", {
         method: "POST",
@@ -201,8 +334,9 @@
         body: JSON.stringify({ id: jobId, applied: applied })
       });
       const card = document.getElementById("card-" + jobId);
-      if (applied) card.classList.add("applied");
-      else card.classList.remove("applied");
+      card.classList.toggle("applied", applied);
+      card.dataset.applied = applied ? "yes" : "no";
+      applyFilters();
     }
   </script>
 

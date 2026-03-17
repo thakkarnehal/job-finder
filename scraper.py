@@ -1,3 +1,4 @@
+import re
 import time
 import requests
 from playwright.sync_api import sync_playwright
@@ -39,7 +40,16 @@ EXCLUDE_KEYWORDS = [
     "director",
     "manager",
     "phd",
+    "ph.d",
+    "doctorate",
+    "doctoral",
 ]
+
+# Matches "4+ years of experience", "5 years experience", "10+ years exp", etc.
+EXPERIENCE_RE = re.compile(
+    r'\b([4-9]|\d{2,})\s*\+?\s*years?\s*(of\s+)?(experience|exp)\b',
+    re.IGNORECASE,
+)
 
 US_INDICATORS = [
     "us", "usa", "united states", "remote", "new york", "san francisco",
@@ -66,6 +76,8 @@ def passes_filters(title, description, location):
         return False
     combined = (title + " " + description).lower()
     if any(kw in combined for kw in EXCLUDE_KEYWORDS):
+        return False
+    if EXPERIENCE_RE.search(combined):
         return False
     return any(kw in combined for kw in KEYWORDS)
 
