@@ -1,5 +1,6 @@
 import re
 import time
+from urllib.parse import urlparse, urlunparse
 import requests
 from playwright.sync_api import sync_playwright
 from playwright_stealth import Stealth
@@ -20,10 +21,12 @@ SEARCH_QUERIES = [
     "AI engineer",
 ]
 
-KEYWORDS = [
+# Title must contain at least one of these — prevents off-topic jobs sneaking in
+# via a stray keyword mention in the description.
+TITLE_KEYWORDS = [
     "machine learning",
-    "python",
     "data scientist",
+    "data science",
     "ai engineer",
     "ml engineer",
     "artificial intelligence",
@@ -31,6 +34,12 @@ KEYWORDS = [
     "nlp",
     "large language model",
     "llm",
+    "research scientist",
+    "research engineer",
+    "applied scientist",
+    "applied ml",
+    "computer vision",
+    "analytics engineer",
 ]
 
 EXCLUDE_KEYWORDS = [
@@ -163,11 +172,21 @@ def is_reputable(company):
     return any(term in c for term in COMPANY_ALLOWLIST)
 
 
+def normalize_url(url):
+    """Strip query params so LinkedIn/Indeed tracking variants dedup correctly."""
+    p = urlparse(url)
+    return urlunparse((p.scheme, p.netloc, p.path, "", "", ""))
+
+
 def passes_filters(title, description, location, company=""):
     if not is_reputable(company):
         return False
     loc = location.lower()
     if not any(ind in loc for ind in US_INDICATORS):
+        return False
+    title_lower = title.lower()
+    # Title must match — prevents off-topic roles sneaking in via description keywords
+    if not any(kw in title_lower for kw in TITLE_KEYWORDS):
         return False
     combined = (title + " " + description).lower()
     if any(kw in combined for kw in EXCLUDE_KEYWORDS):
@@ -176,7 +195,7 @@ def passes_filters(title, description, location, company=""):
         return False
     if EDUCATION_RE.search(combined):
         return False
-    return any(kw in combined for kw in KEYWORDS)
+    return True
 
 
 # ──────────────────────────────────────────────
@@ -245,15 +264,16 @@ def scrape_linkedin(page):
                 job_url = link_el.get_attribute("href") if link_el else ""
 
                 company = company_el.inner_text().strip() if company_el else "Unknown"
-                if not title or not job_url or job_url in seen_urls:
+                clean_url = normalize_url(job_url) if job_url else ""
+                if not title or not clean_url or clean_url in seen_urls:
                     continue
                 if not passes_filters(title, "", location, company):
                     continue
-                seen_urls.add(job_url)
+                seen_urls.add(clean_url)
                 jobs.append({
                     "title": title,
                     "company": company,
-                    "url": job_url,
+                    "url": clean_url,
                     "location": location,
                     "date_posted": "",
                     "description": "",
@@ -296,15 +316,16 @@ def scrape_indeed(page):
                 job_url = "https://www.indeed.com" + href if href.startswith("/") else href
 
                 company = company_el.inner_text().strip() if company_el else "Unknown"
-                if not title or not job_url or job_url in seen_urls:
+                clean_url = normalize_url(job_url) if job_url else ""
+                if not title or not clean_url or clean_url in seen_urls:
                     continue
                 if not passes_filters(title, "", location, company):
                     continue
-                seen_urls.add(job_url)
+                seen_urls.add(clean_url)
                 jobs.append({
                     "title": title,
                     "company": company,
-                    "url": job_url,
+                    "url": clean_url,
                     "location": location,
                     "date_posted": "",
                     "description": "",
