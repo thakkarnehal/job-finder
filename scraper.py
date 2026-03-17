@@ -39,15 +39,21 @@ EXCLUDE_KEYWORDS = [
     "principal",
     "director",
     "manager",
-    "phd",
-    "ph.d",
-    "doctorate",
-    "doctoral",
 ]
 
-# Matches "4+ years of experience", "5 years experience", "10+ years exp", etc.
+# Catches "4+ years" (explicit plus — unambiguous) OR "4 years of/in experience/work/industry"
 EXPERIENCE_RE = re.compile(
-    r'\b([4-9]|\d{2,})\s*\+?\s*years?\s*(of\s+)?(experience|exp)\b',
+    r'\b([4-9]|\d{2,})\s*\+\s*years?\b'
+    r'|\b([4-9]|\d{2,})\s*years?\s*(of\s+)?(experience|exp|work\b|industry\b|professional)',
+    re.IGNORECASE,
+)
+
+# Catches masters / MS / MBA degree requirements
+EDUCATION_RE = re.compile(
+    r"\bmaster['\u2019]?s?\s*(degree|of science|of engineering|in\b)"
+    r'|\bm\.s\.\b|\bmsc\b|\bms\s+degree\b|\bm\.eng\b'
+    r'|\bmba\b'
+    r'|\bph\.?d\.?\b|\bdoctorate\b|\bdoctoral\b',
     re.IGNORECASE,
 )
 
@@ -167,6 +173,8 @@ def passes_filters(title, description, location, company=""):
     if any(kw in combined for kw in EXCLUDE_KEYWORDS):
         return False
     if EXPERIENCE_RE.search(combined):
+        return False
+    if EDUCATION_RE.search(combined):
         return False
     return any(kw in combined for kw in KEYWORDS)
 

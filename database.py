@@ -34,16 +34,23 @@ def init_db():
         conn.commit()
 
 
-def job_exists(url):
-    """Return True if a job with this URL is already in the database."""
+def job_exists(url, title=None, company=None):
+    """Return True if a job with this URL or the same title+company already exists."""
     with get_connection() as conn:
-        row = conn.execute("SELECT 1 FROM jobs WHERE url = ?", (url,)).fetchone()
-    return row is not None
+        if conn.execute("SELECT 1 FROM jobs WHERE url = ?", (url,)).fetchone():
+            return True
+        if title and company:
+            if conn.execute(
+                "SELECT 1 FROM jobs WHERE lower(title) = lower(?) AND lower(company) = lower(?)",
+                (title, company),
+            ).fetchone():
+                return True
+    return False
 
 
 def save_job(job):
     """Insert a job into the database. Returns True if saved, False if duplicate."""
-    if job_exists(job["url"]):
+    if job_exists(job["url"], job.get("title"), job.get("company")):
         return False
     with get_connection() as conn:
         conn.execute("""
