@@ -101,21 +101,6 @@ def insights():
     )
 
 
-@app.route("/insights/refresh", methods=["POST"])
-def refresh_insights():
-    """Force-regenerate today's newsletter."""
-    today = date.today().isoformat()
-    jobs_today = get_jobs_today()
-    if not jobs_today:
-        return jsonify({"ok": False, "error": "No jobs scraped today"})
-    try:
-        newsletter = generate_newsletter(jobs_today)
-        if newsletter:
-            save_newsletter(today, json.dumps(newsletter))
-        return jsonify({"ok": True})
-    except Exception as e:
-        return jsonify({"ok": False, "error": str(e)})
-
 
 if __name__ == "__main__":
     app.run(debug=True)

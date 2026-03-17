@@ -59,19 +59,6 @@
       margin-top: 0.2rem;
     }
 
-    .refresh-btn {
-      background: white;
-      border: 1px solid #d1d5db;
-      color: #374151;
-      padding: 0.4rem 0.9rem;
-      border-radius: 6px;
-      font-size: 0.85rem;
-      cursor: pointer;
-    }
-
-    .refresh-btn:hover { background: #f9fafb; }
-    .refresh-btn:disabled { opacity: 0.5; cursor: default; }
-
     /* ── Cards ── */
     .grid {
       display: grid;
@@ -193,9 +180,6 @@
       <h2>Today's Market Snapshot</h2>
       <p>{{ today }} &nbsp;·&nbsp; {{ job_count }} job{{ 's' if job_count != 1 }} scraped today</p>
     </div>
-    {% if job_count > 0 %}
-      <button class="refresh-btn" id="refresh-btn" onclick="refreshInsights()">↻ Regenerate</button>
-    {% endif %}
   </div>
 
   {% if newsletter %}
@@ -256,23 +240,6 @@
     </div>
   {% endif %}
 
-  <script>
-    function refreshInsights() {
-      const btn = document.getElementById("refresh-btn");
-      btn.disabled = true;
-      btn.textContent = "Regenerating…";
-      fetch("/insights/refresh", { method: "POST" })
-        .then(r => r.json())
-        .then(data => {
-          if (data.ok) location.reload();
-          else {
-            btn.disabled = false;
-            btn.textContent = "↻ Regenerate";
-            alert("Error: " + data.error);
-          }
-        });
-    }
-  </script>
 
 </body>
 </html>
