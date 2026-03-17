@@ -24,37 +24,6 @@ jobs:
       - name: Install Playwright browser
         run: playwright install --with-deps chromium
 
-      - name: Test OpenAI connectivity
-        env:
-          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
-        run: |
-          python -c "
-          import os, httpx, traceback
-          api_key = os.environ.get('OPENAI_API_KEY', 'NOT_SET')
-          print(f'API key present: {bool(api_key) and api_key != \"NOT_SET\"}')
-          print(f'API key prefix: {api_key[:15]}...')
-          try:
-              headers = {'Authorization': f'Bearer {api_key}'}
-              r = httpx.get('https://api.openai.com/v1/models', headers=headers, timeout=15)
-              print(f'Models endpoint status: {r.status_code}')
-              print(f'Response: {r.text[:200]}')
-          except Exception as e:
-              print(f'Models endpoint FAILED: {type(e).__name__}: {e}')
-              traceback.print_exc()
-          from openai import OpenAI
-          client = OpenAI(api_key=api_key, timeout=30.0)
-          try:
-              resp = client.chat.completions.create(
-                  model='gpt-4o-mini',
-                  messages=[{'role': 'user', 'content': 'Say hi'}],
-                  max_tokens=5,
-              )
-              print(f'OpenAI API call SUCCESS: {resp.choices[0].message.content}')
-          except Exception as e:
-              print(f'OpenAI API call FAILED: {type(e).__name__}: {e}')
-              traceback.print_exc()
-          "
-
       - name: Run pipeline
         env:
           OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
@@ -62,3 +31,11 @@ jobs:
           GMAIL_APP_PASSWORD: ${{ secrets.GMAIL_APP_PASSWORD }}
           EMAIL_RECIPIENT: ${{ secrets.EMAIL_RECIPIENT }}
         run: python main.py
+
+      - name: Save seen jobs back to repo
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add seen_jobs.json
+          git diff --staged --quiet || git commit -m "Update seen jobs [skip ci]"
+          git push

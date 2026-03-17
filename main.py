@@ -2,15 +2,33 @@
 main.py — runs the full pipeline:
   1. Scrape new jobs from all sources
   2. Score unscored jobs with GPT-4o-mini
-  3. Email the top 5 of today's jobs
+  3. Email only jobs not seen in previous runs
 """
 
+import json
+import os
 import sys
 
 from scraper import main as run_scraper
 from scorer import main as run_scorer
 from emailer import send_digest
 from database import get_top_jobs_today
+
+SEEN_JOBS_FILE = "seen_jobs.json"
+
+
+def load_seen_urls():
+    if os.path.exists(SEEN_JOBS_FILE):
+        with open(SEEN_JOBS_FILE) as f:
+            return set(json.load(f))
+    return set()
+
+
+def save_seen_urls(new_urls):
+    existing = load_seen_urls()
+    updated = sorted(existing | new_urls)
+    with open(SEEN_JOBS_FILE, "w") as f:
+        json.dump(updated, f, indent=2)
 
 
 def main():
@@ -34,25 +52,32 @@ def main():
         print(f"ERROR: Scorer crashed: {e}")
         sys.exit(1)
 
-    # ── Step 3: Email ────────────────────────────
+    # ── Step 3: Email only new jobs ───────────────
     print("\n" + "=" * 60)
     print("STEP 3: Sending email digest")
     print("=" * 60)
-    jobs = get_top_jobs_today(n=5)
-    if not jobs:
-        print("No scored jobs found from today — skipping email.")
+
+    seen_urls = load_seen_urls()
+    all_jobs_today = get_top_jobs_today(n=50)
+    new_jobs = [j for j in all_jobs_today if j["url"] not in seen_urls]
+
+    if not new_jobs:
+        print("No new jobs since last run — skipping email.")
         return
 
-    print(f"  Top {len(jobs)} jobs today:")
-    for job in jobs:
+    top_new = new_jobs[:5]
+    print(f"  {len(new_jobs)} new jobs found, emailing top {len(top_new)}:")
+    for job in top_new:
         print(f"    {job['score']}/10 — {job['title']} at {job['company']}")
 
     try:
-        send_digest(jobs)
+        send_digest(top_new)
     except Exception as e:
         print(f"ERROR: Email failed: {e}")
         sys.exit(1)
 
+    # Mark all today's jobs as seen so they don't get re-emailed
+    save_seen_urls({j["url"] for j in all_jobs_today})
     print("\nPipeline complete.")
 
 
