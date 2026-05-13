@@ -47,7 +47,7 @@ python main.py
 
 ## GitHub Actions (automated daily run)
 
-The workflow runs daily at ~8 AM EDT via `.github/workflows/daily_scrape.yml`. It requires the following repository secrets:
+The workflow runs daily at ~9 AM EDT via `.github/workflows/daily_scrape.yml`. It requires the following repository secrets:
 
 | Secret | Description |
 |---|---|
@@ -64,6 +64,24 @@ Add them at **Settings → Secrets and variables → Actions**.
 - **Add/remove companies** — edit `COMPANY_ALLOWLIST` in [scraper.py](scraper.py)
 - **Change search queries** — edit `SEARCH_QUERIES` in [scraper.py](scraper.py)
 - **Adjust experience/education filters** — edit `EXPERIENCE_RE` and `EDUCATION_RE` in [scraper.py](scraper.py)
+
+## Limitations
+
+- **LinkedIn/Indeed scraping is fragile** — both sites actively block bots and change their HTML structure. Scraping can silently return 0 results if they update their layout or serve a CAPTCHA page.
+- **No job description for LinkedIn/Indeed at scrape time** — descriptions are fetched later during scoring via a separate HTTP request, which can fail or return incomplete content.
+- **SQLite doesn't persist across GitHub Actions runs** — `jobs.db` is rebuilt from scratch each run since the Actions runner is ephemeral. Only `seen_jobs.json` persists (committed back to the repo).
+- **Company allowlist is manually curated** — jobs from companies not on the list are silently dropped, so you can miss good roles at smaller or newer companies.
+- **GitHub Actions scheduler lag** — scheduled runs can be delayed 15–30 minutes during peak hours.
+- **Experience/education filters use regex** — they can produce false positives (e.g. a job mentioning "4 years of stability" in a non-requirements context gets filtered out).
+
+## Next steps
+
+- **Add more job sources** — Lever, Workday, and direct company career pages (e.g. Google Careers, Meta Careers) would significantly increase coverage
+- **Replace LinkedIn/Indeed scraping with APIs** — LinkedIn has an official Jobs API (requires partnership); Indeed has a Publisher API for more reliable access
+- **Persist the database** — store `jobs.db` in a persistent store (e.g. Supabase, PlanetScale, or even a committed SQLite file) so scores and history accumulate across runs
+- **Build a simple review UI** — a lightweight web app to browse all scored jobs, mark applied/rejected, and give feedback to improve scoring over time
+- **Fine-tune scoring with feedback** — use thumbs up/down on emailed jobs to build a dataset and improve fit scoring beyond a generic GPT prompt
+- **Slack/SMS notifications** — send the digest to Slack or via SMS (Twilio) as an alternative to email
 
 ## Project structure
 
