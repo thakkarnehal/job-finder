@@ -2,7 +2,7 @@ name: Daily Job Scraper
 
 on:
   schedule:
-    - cron: "0 13 * * *"   # 8:00 AM EST (UTC-5) every day
+    - cron: "0 12 * * *"   # 8:00 AM EDT (UTC-4) every day
   workflow_dispatch:         # allows manual trigger from GitHub UI
 
 jobs:
