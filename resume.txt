@@ -1,49 +1,46 @@
 NEHAL THAKKAR
-EDUCATION
-Rutgers University, Rutgers School of Arts and Sciences - New Brunswick, NJ Bachelor of Science in Computer Science Certificate in Data Science
-Honors: Rutgers Honors Program, Dean’s List (Fall 2020-Spring 2024)
-Yonsei University, South Korea, Study Abroad 
-May 2024
-GPA: 3.89
 WORK EXPERIENCE
-Fall 2023
-JP Morgan Chase & Co AI & Data Science Analyst Newark, DE
-September 2024-Present
-▪ Conducted statistical analyses for anomaly detection across diverse datasets, including derivatives and sub-ledger data,
-driving enhanced monitoring and operational efficiency
-▪ Diagnosed critical data quality issue in OTC datasets, proposing a scalable workflow in Databricks utilizing Python and
-SQL to be adaptable across several models
-▪ Performed exploratory analysis and collaborated with a team of 4 on a proposal for clear product recommendations on
-new NLP and LLM technologies to democratize data analytics, presenting strategic insights to senior management
-AI & Data Science Summer Analyst June 2023-August 2023
-▪ Designed an outlier detection system using 6+ ML algorithms and statistical methods in python to detect time series
-anomalies in 900M+ daily contract derivative notional value records
-▪ Developed a Jupyter notebook-based codebase for error handling, cutting manual work by 75% and paving the way for
-potential automated error correction
-▪ Deployed 5 scalable and time-sensitive workflows in Alteryx to validate the performance of a new data pipeline
-Verizon Basking Ridge, NJ
-Data Science Intern June 2022 - August 2022
-▪ Applied ML models in Python to implement hierarchal clustering on 100K wireless KPI data records using binary and
-multi-class classification, creating fast detection of 5+ antenna issues with 84% issue classification accuracy
-▪ Identified manual labeling errors through data analysis utilizing machine learning algorithms to strengthen the dataset
-▪ Moderated a 4-person executive leadership panel for 20 interns focused on career advancement and opportunities
-Rutgers University Interdisciplinary Research Team Research Intern New Brunswick, NJ
-September 2021 - May 2022
-▪ Extracted data from 10+ nested web pages in Python to leverage Urllib and BeautifulSoup
-▪ Created 10 tables after cleaning extracted data to upload on MySQL workbench utilized across additional project teams
-▪ Collaborated efficiently with 6 team members by delegating tasks to build a conversational AI system
-Innovative Defense Technologies Virtual, VA
-Software Engineer Intern May 2021 - August 2021
-▪ Utilized debugging methods across 4 languages to devise optimal solutions and push product-ready code for backend
-capabilities and demonstrated the functionality of application to clientele
-▪ Resolved gaps in Postgres databases across 100+ tables by developing SQL queries independently
-▪ Onboarded 3 new project team members on system protocols and best practices
-LEADERSHIP
-Rutgers University Raas and Garba Association September 2020 - Spring 2023
-Secretary New Brunswick, NJ
-▪ Managed registration logistics, vendor deadlines, and team travel for 25 people for 5 national dance competitions
-▪ Trained 20+ hours a week with a diverse team to compete nationally against 20 collegiate dance teams
-SKILLS & INTERESTS
-▪ Programming Languages: Java, Python, SQL, R, HTML, CSS, JavaScript, C#, C
-▪ Misc. Technologies: JupyterLab, Android Studio, Google Firebase, Github, MySQL Workbench, Linux, Eclipse
-▪ Skills: Data Science, Data Analytics, Software Engineering, Communication, Leadership, Problem Solving
+JP Morgan Chase & Co                                                          Newark, DE
+AI & Data Science Analyst                                             September 2024–Present
+▪ Architected a prototype of a multi-agent LLM system (Google ADK) integrating Confluence, Jira, and Databricks MCP Servers to automate data quality triage for 3+ controller teams demonstrating reduction of manual investigation time by ~60%
+▪ Engineered anomaly detection models (Isolation Forest, Autoencoder, LOF) on a production Databricks pipeline (Spark, MLflow), enabling real-time monitoring of 10M+ daily OTC derivative trades for regulatory reporting consumption
+▪ Partnered cross-functionally with business and technology teams to refine feature engineering and training data through statistical analysis, and feedback loops — driving a 40% precision improvement
+▪ Spearheaded pivot to a hybrid rules + ML pipeline, codifying stakeholder thresholds and rebuilding training data from single-day snapshots to cross-year datasets to reduce false positives by 80% and surface critical issues
+▪ Implemented a reusable Databricks remediation workflow (PySpark, SQL) to surface data quality defects 3 steps earlier in regulatory reporting pipelines, reducing downstream issue escalation and manual review
+
+AI & Data Science Summer Analyst                                     June 2023–August 2023
+▪ Built a Python time-series anomaly detection pipeline using an ensemble of 6 statistical and ML models with a voting mechanism to monitor 10M+ daily derivatives notional records
+▪ Evaluated models (incl. ARIMA) under sparse anomaly conditions and refined detection logic through error analysis and domain learning, reducing noisy anomaly signals by ~20%
+
+Verizon                                                                   Basking Ridge, NJ
+Data Science Intern                                                  June 2022–August 2022
+▪ Implemented Random Forest for anomaly detection and KMeans/DBSCAN for fault-type clustering on 100K+ wireless KPI records, achieving 84% accuracy across 5+ antenna faults
+▪ Uncovered labeling errors through ML-driven analysis, correcting 5% of records to improve training data quality and reduce propagation of labeling noise into downstream models
+
+Rutgers University Interdisciplinary Research Team                      New Brunswick, NJ
+Research Intern                                                  September 2021–May 2022
+▪ Engineered a Python web scraping pipeline (urllib, BeautifulSoup) to automate extraction and structuring of data from 10+ nested pages via DOM traversal, enabling a reusable data ingestion workflow that eliminated manual collection
+▪ Led a 6-person team to design and deliver a conversational system, coordinating task delegation and integrating components across workstreams
+
+EDUCATION
+
+Rutgers University, School of Arts and Sciences – New Brunswick, NJ
+B.S. Computer Science, Certificate in Data Science | Summa Cum Laude
+Honors: Rutgers Honors Program, Dean's List (all semesters)
+Study Abroad: Yonsei University - Seoul, Korea
+
+PERSONAL DEVELOPMENT PROJECTS
+
+Flight Recommender System                                                            2026
+▪ Engineered a Neural Collaborative Filtering recommender system in PyTorch (HR@10: 1.0, NDCG@10: 0.591), modeling user preference and flight delay risk from 1 years of BTS data; deployed via FastAPI, Docker, and AWS
+
+LLM-Powered Job Match Engine
+▪ Built an automated Python pipeline that scrapes LinkedIn and Greenhouse, filters by keyword rules, and scores each role against my resume via the Claude API — deployed on GitHub Actions to deliver a ranked job digest daily
+
+AI or Genuine Review Detector
+▪ Trained a PyTorch DistilBERT classifier to detect AI-generated restaurant reviews (99.6% accuracy), deployed as a Chrome extension via FastAPI and Docker on AWS with real-time detection and adjusted rating overlays
+
+SKILLS & TECHNOLOGIES
+Languages: Python, SQL, R, Java
+ML & AI: scikit-learn, Isolation Forest, Autoencoders, LOF, LLMs (Claude, OpenAI), Google ADK, LangChain, PyTorch, Pandas
+Tools: Databricks, Spark, MLflow (MLOps), FastAPI, Docker, AWS, GitHub
