@@ -15,6 +15,7 @@ if not api_key:
 client = OpenAI(api_key=api_key, timeout=60.0, max_retries=3)
 
 RESUME_PATH = "resume.txt"
+CRITERIA_PATH = "criteria.md"
 
 PROMPT_TEMPLATE = """You are an ATS-style evaluator. Score the candidate's resume against the job below
 using ONLY evidence explicitly present in the resume. Never infer skills, tools, or seniority that are
@@ -30,6 +31,10 @@ place outside the United States — this INCLUDES any "Remote <country>" that is
 string "Location outside US" to the dealbreakers array and set overall_score to 0. Only US locations,
 plain "Remote", "Remote US", and remote with no country named are acceptable. Never omit this dealbreaker
 when the location is non-US, no matter how strong the rest of the match is.
+
+<criteria>
+{criteria}
+</criteria>
 
 <job_description>
 {description}
@@ -56,9 +61,9 @@ Step 4 — overall_score (0-100): weighted average. Default weights: hard_skills
 experience_level_match 30%, domain_relevance 20%, education_certification_match 10%. Adjust only if the
 JD clearly signals a different priority (e.g. heavily emphasizes "PhD required").
 
-Step 5 — dealbreakers: list any violated screening_constraint, or any must_have marked "not_found"
-(e.g. a required Master's/PhD the resume lacks, 5+ years when the resume shows far less, a location
-outside the US, a required clearance). A dealbreaker must appear even if overall_score is high.
+Step 5 — dealbreakers: list every HARD DEALBREAKER from the CRITERIA that this job triggers (plus any
+must_have the criteria treat as a reject). Soft factors from the CRITERIA must NOT be listed here —
+reflect those in the score instead. A dealbreaker must appear even if overall_score is high.
 
 Be conservative: do not overstate the candidate's experience and do not credit skills the resume does
 not show. Output ONLY valid JSON (no markdown fences) matching this schema:
@@ -86,9 +91,17 @@ def load_resume():
     return content
 
 
-def score_job(job, resume):
+def load_criteria():
+    if not os.path.exists(CRITERIA_PATH):
+        raise FileNotFoundError(f"{CRITERIA_PATH} not found.")
+    with open(CRITERIA_PATH) as f:
+        return f.read().strip()
+
+
+def score_job(job, resume, criteria):
     prompt = PROMPT_TEMPLATE.format(
         today=date.today().isoformat(),
+        criteria=criteria,
         resume=resume,
         title=job["title"],
         company=job["company"],
@@ -119,6 +132,7 @@ def score_job(job, resume):
 
 def main():
     resume = load_resume()
+    criteria = load_criteria()
     jobs = get_unscored_jobs()
 
     if not jobs:
@@ -129,7 +143,7 @@ def main():
 
     for job in jobs:
         try:
-            eligible, score, reason, summary = score_job(job, resume)
+            eligible, score, reason, summary = score_job(job, resume, criteria)
             if(not eligible):
                 print(f"FILTERED OUT {reason}: {job['title']} at {job['company']}")
                 mark_ineligible(job['id'], score, f"Ineligible — {reason}")
