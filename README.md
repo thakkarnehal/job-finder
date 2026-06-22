@@ -1,15 +1,21 @@
 # Job Finder
 
-A daily automated pipeline that scrapes ML/AI/Data Science job postings, scores them against your resume using GPT-4o-mini, and emails you the top matches every morning.
+A daily automated pipeline that scrapes ML/AI/Data Science job postings, screens and scores them against your resume with an ATS-style GPT-4o evaluator, and emails you the top matches every morning.
 
 ## How it works
 
-1. **Scrape** — pulls jobs from LinkedIn, Indeed, and Greenhouse boards (Stripe, Datadog), filtering for title keywords, US locations, and companies on an allowlist
-2. **Filter** — automatically drops roles requiring 4+ years of experience, a Master's/PhD, or senior/staff/director titles
-3. **Score** — sends each new job + your resume to GPT-4o-mini for a 1–10 fit score with a short summary
-4. **Email** — sends a daily digest with the top 5 new jobs as a formatted HTML email
+1. **Scrape** — pulls jobs from the public JSON APIs of a curated set of company boards on **Greenhouse, Lever, and Ashby**. A free pre-filter keeps only jobs that (a) are in a US location, (b) have an ML/AI/Data Science keyword in the title, and (c) aren't senior/staff/lead/manager/director by title.
+2. **Screen & score** — each new job (with its location) plus your resume is sent to **GPT-4o** as an ATS-style evaluator. It extracts the job's must-have / nice-to-have requirements, checks them against evidence in your resume, and flags **dealbreakers** (a required Master's/PhD you don't have, far more experience than you have, a non-US location, a current-student/internship requirement, etc.). Jobs with any dealbreaker are dropped; the rest get a weighted **0–100** fit score plus a short summary.
+3. **Email** — sends a daily HTML digest of the new jobs scoring **≥ 60**, top first.
 
 Seen jobs are tracked in `seen_jobs.json` so you never get the same listing twice.
+
+## Two-layer filtering
+
+Filtering is deliberately split so the expensive model isn't wasted on obvious misses:
+
+- **Cheap, deterministic (scraper)** — US location, title keyword, and seniority checks. No tokens spent.
+- **Smart, evidence-based (GPT-4o)** — experience level, degree requirements, enrollment status, and a mandatory location backstop, judged against the actual resume.
 
 ## Setup
 
@@ -18,17 +24,21 @@ Seen jobs are tracked in `seen_jobs.json` so you never get the same listing twic
 ```bash
 git clone https://github.com/thakkarnehal/job-finder.git
 cd job-finder
+python -m venv .venv && source .venv/bin/activate
 pip install -r requirements.txt
-playwright install --with-deps chromium
 ```
 
 ### 2. Add your resume
 
-Paste your resume text into `resume.txt`.
+Paste your resume text into `resume.txt`. The scorer reads this directly, so keep it current.
 
 ### 3. Configure environment variables
 
-Create a `.env` file:
+Copy the template and fill in your values:
+
+```bash
+cp .env.example .env
+```
 
 ```env
 OPENAI_API_KEY=sk-...
@@ -47,7 +57,7 @@ python main.py
 
 ## GitHub Actions (automated daily run)
 
-The workflow runs daily at ~9 AM EDT via `.github/workflows/daily_scrape.yml`. It requires the following repository secrets:
+The workflow runs daily at ~9 AM EDT via `.github/workflows/daily_scrape.yml`. Locally the secrets come from `.env`; in Actions they come from repository secrets (no `.env` is committed):
 
 | Secret | Description |
 |---|---|
@@ -60,37 +70,37 @@ Add them at **Settings → Secrets and variables → Actions**.
 
 ## Customization
 
-- **Add Greenhouse boards** — add entries to `GREENHOUSE_BOARDS` in [scraper.py](scraper.py)
-- **Add/remove companies** — edit `COMPANY_ALLOWLIST` in [scraper.py](scraper.py)
-- **Change search queries** — edit `SEARCH_QUERIES` in [scraper.py](scraper.py)
-- **Adjust experience/education filters** — edit `EXPERIENCE_RE` and `EDUCATION_RE` in [scraper.py](scraper.py)
+- **Add company boards** — add entries to `GREENHOUSE_BOARDS`, `LEVER_BOARDS`, or `ASHBY_BOARDS` in [scraper.py](scraper.py)
+- **Change which titles match** — edit `TITLE_KEYWORDS` (must-match) or `EXCLUDE_KEYWORDS` (seniority) in [scraper.py](scraper.py)
+- **Adjust US location matching** — edit `US_INDICATORS` in [scraper.py](scraper.py)
+- **Tune screening / scoring** — edit `PROMPT_TEMPLATE` in [scorer.py](scorer.py) (e.g. the experience threshold, weighting, or dealbreaker rules)
+- **Change the email cutoff** — adjust the `score >= 60` floor in [main.py](main.py)
 
 ## Limitations
 
-- **LinkedIn/Indeed scraping is fragile** — both sites actively block bots and change their HTML structure. Scraping can silently return 0 results if they update their layout or serve a CAPTCHA page.
-- **No job description for LinkedIn/Indeed at scrape time** — descriptions are fetched later during scoring via a separate HTTP request, which can fail or return incomplete content.
-- **SQLite doesn't persist across GitHub Actions runs** — `jobs.db` is rebuilt from scratch each run since the Actions runner is ephemeral. Only `seen_jobs.json` persists (committed back to the repo).
-- **Company allowlist is manually curated** — jobs from companies not on the list are silently dropped, so you can miss good roles at smaller or newer companies.
+- **Board coverage is manually curated** — only companies listed in the board dicts are scraped, so you'll miss roles at companies you haven't added.
+- **LLM judgments aren't perfectly deterministic** — even at `temperature=0` the model can occasionally vary. The mandatory location gate and dealbreaker rules reduce this, but a borderline call may flip run-to-run.
+- **SQLite doesn't persist across GitHub Actions runs** — `jobs.db` is rebuilt each run since the Actions runner is ephemeral. Only `seen_jobs.json` persists (committed back to the repo).
+- **Descriptions are truncated** — only the first ~3000 characters of each posting are sent to the model, so requirements buried deep in a long description may be missed.
 - **GitHub Actions scheduler lag** — scheduled runs can be delayed 15–30 minutes during peak hours.
-- **Experience/education filters use regex** — they can produce false positives (e.g. a job mentioning "4 years of stability" in a non-requirements context gets filtered out).
 
 ## Next steps
 
-- **Add more job sources** — Lever, Workday, and direct company career pages (e.g. Google Careers, Meta Careers) would significantly increase coverage
-- **Replace LinkedIn/Indeed scraping with APIs** — LinkedIn has an official Jobs API (requires partnership); Indeed has a Publisher API for more reliable access
-- **Persist the database** — store `jobs.db` in a persistent store (e.g. Supabase, PlanetScale, or even a committed SQLite file) so scores and history accumulate across runs
-- **Build a simple review UI** — a lightweight web app to browse all scored jobs, mark applied/rejected, and give feedback to improve scoring over time
-- **Fine-tune scoring with feedback** — use thumbs up/down on emailed jobs to build a dataset and improve fit scoring beyond a generic GPT prompt
+- **Add more job sources** — Workday and direct company career pages would increase coverage beyond Greenhouse/Lever/Ashby
+- **Persist the database** — store `jobs.db` in a persistent store (e.g. Supabase) so scores and history accumulate across runs
+- **Surface the rich ATS output** — the model already returns per-requirement evidence and category scores; storing and displaying them would make the digest far more informative
+- **Build a review UI** — a lightweight web app to browse scored jobs, mark applied/rejected, and feed that back into scoring
 - **Slack/SMS notifications** — send the digest to Slack or via SMS (Twilio) as an alternative to email
 
 ## Project structure
 
 ```
-main.py          # orchestrates the pipeline
-scraper.py       # scrapes LinkedIn, Indeed, Greenhouse
-scorer.py        # scores jobs with GPT-4o-mini
+main.py          # orchestrates the pipeline (scrape → score → email)
+scraper.py       # scrapes Greenhouse / Lever / Ashby boards + cheap pre-filter
+scorer.py        # ATS-style screening & 0–100 scoring with GPT-4o
 emailer.py       # builds and sends the HTML email digest
 database.py      # SQLite helpers (jobs.db)
 resume.txt       # your resume (used for scoring)
 seen_jobs.json   # tracks already-emailed job URLs
+.env.example     # template for required environment variables
 ```
