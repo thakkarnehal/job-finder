@@ -7,10 +7,12 @@ main.py — runs the full pipeline:
 
 import sys
 
-from scraper import main as run_scraper, load_seen_urls, save_seen_urls
+from scraper import main as run_scraper
 from scorer import main as run_scorer
 from emailer import send_digest
-from database import get_top_jobs_today
+from database import get_jobs_to_email, mark_emailed
+
+MIN_SCORE = 60   # only email jobs scoring at least this (0-100)
 
 
 def main():
@@ -39,16 +41,13 @@ def main():
     print("STEP 3: Sending email digest")
     print("=" * 60)
 
-    seen_urls = load_seen_urls()
-    all_jobs_today = get_top_jobs_today(n=50)
-    new_jobs = [j for j in all_jobs_today if j["url"] not in seen_urls and j['score'] >= 60]
+    top_new = get_jobs_to_email(MIN_SCORE, limit=5)
 
-    if not new_jobs:
-        print("No new jobs since last run — skipping email.")
+    if not top_new:
+        print("No new jobs above the score floor — skipping email.")
         return
 
-    top_new = new_jobs[:5]
-    print(f"  {len(new_jobs)} new jobs found, emailing top {len(top_new)}:")
+    print(f"  Emailing {len(top_new)} jobs:")
     for job in top_new:
         print(f"    {job['score']}/100 — {job['title']} at {job['company']}")
 
@@ -58,8 +57,8 @@ def main():
         print(f"ERROR: Email failed: {e}")
         sys.exit(1)
 
-    # Mark all today's jobs as seen so they don't get re-emailed
-    save_seen_urls({j["url"] for j in all_jobs_today})
+    # Mark them emailed so a later run today doesn't send them again.
+    mark_emailed([j["id"] for j in top_new])
     print("\nPipeline complete.")
 
 

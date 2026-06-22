@@ -1,26 +1,8 @@
-import json
-import os
 import re
 from datetime import datetime
 from urllib.parse import urlparse, urlunparse
 import requests
 from database import init_db, save_job
-
-SEEN_JOBS_FILE = "seen_jobs.json"
-
-
-def load_seen_urls():
-    if os.path.exists(SEEN_JOBS_FILE):
-        with open(SEEN_JOBS_FILE) as f:
-            return set(json.load(f))
-    return set()
-
-
-def save_seen_urls(new_urls):
-    existing = load_seen_urls()
-    updated = sorted(existing | new_urls)
-    with open(SEEN_JOBS_FILE, "w") as f:
-        json.dump(updated, f, indent=2)
 
 
 # ──────────────────────────────────────────────
@@ -97,12 +79,13 @@ TITLE_KEYWORDS = [
 ]
 
 EXCLUDE_KEYWORDS = [
-    "senior",
     "staff",
     "principal",
     "director",
     "manager",
     "leader",
+    "intern",
+    "phd",
 ]
 
 
@@ -305,21 +288,17 @@ def main():
         except Exception as e:
             print(f"  WARNING: {company} Ashby failed: {e}")
 
-    seen_urls = load_seen_urls()
-    new_jobs = [j for j in all_jobs if j["url"] not in seen_urls]
-    already_seen = len(all_jobs) - len(new_jobs)
-
     print(f"\n{'=' * 60}")
     print(f"TOTAL MATCHES: {len(all_jobs)} jobs across all sources")
-    print(f"  Already seen in previous runs: {already_seen}")
-    print(f"  New this run: {len(new_jobs)}")
     print(f"{'=' * 60}")
 
+    # save_job dedups against the persistent DB (by URL or title+company),
+    # so previously-seen jobs are skipped automatically across runs.
     saved = 0
     skipped = 0
-    for job in new_jobs:
-        print_job(job)
+    for job in all_jobs:
         if save_job(job):
+            print_job(job)
             saved += 1
         else:
             skipped += 1

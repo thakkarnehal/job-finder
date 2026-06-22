@@ -4,7 +4,7 @@ import time
 from datetime import date
 from dotenv import load_dotenv
 from openai import OpenAI
-from database import get_unscored_jobs, update_score, delete_job
+from database import get_unscored_jobs, update_score, mark_ineligible
 
 load_dotenv()
 
@@ -132,7 +132,7 @@ def main():
             eligible, score, reason, summary = score_job(job, resume)
             if(not eligible):
                 print(f"FILTERED OUT {reason}: {job['title']} at {job['company']}")
-                delete_job(job['id'])
+                mark_ineligible(job['id'], score, f"Ineligible — {reason}")
                 continue
             update_score(job["id"], score, summary)
             print(f"  Scored: {job['title']} at {job['company']} — {score}/100")

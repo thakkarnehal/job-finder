@@ -8,7 +8,7 @@ A daily automated pipeline that scrapes ML/AI/Data Science job postings, screens
 2. **Screen & score** — each new job (with its location) plus your resume is sent to **GPT-4o** as an ATS-style evaluator. It extracts the job's must-have / nice-to-have requirements, checks them against evidence in your resume, and flags **dealbreakers** (a required Master's/PhD you don't have, far more experience than you have, a non-US location, a current-student/internship requirement, etc.). Jobs with any dealbreaker are dropped; the rest get a weighted **0–100** fit score plus a short summary.
 3. **Email** — sends a daily HTML digest of the new jobs scoring **≥ 60**, top first.
 
-Seen jobs are tracked in `seen_jobs.json` so you never get the same listing twice.
+Everything is stored in a **Turso (libSQL) database** that persists across runs: it dedups listings (so you never get the same role twice), keeps each job's score and summary, remembers which jobs were emailed, and marks screened-out jobs as ineligible so they aren't re-scored on later runs. Each job also records its posted date and the date it was found.
 
 ## Two-layer filtering
 
@@ -45,9 +45,13 @@ OPENAI_API_KEY=sk-...
 GMAIL_ADDRESS=you@gmail.com
 GMAIL_APP_PASSWORD=xxxx-xxxx-xxxx-xxxx
 EMAIL_RECIPIENT=you@gmail.com
+TURSO_DATABASE_URL=libsql://job-finder-you.turso.io
+TURSO_AUTH_TOKEN=ey...
 ```
 
 For `GMAIL_APP_PASSWORD`, generate one at [myaccount.google.com/apppasswords](https://myaccount.google.com/apppasswords) (requires 2FA enabled).
+
+For the Turso values, install the [Turso CLI](https://docs.turso.tech/cli/installation) and run `turso db create job-finder`, then `turso db show job-finder --url` and `turso db tokens create job-finder`. If both Turso vars are unset, the app falls back to a local `jobs.db` file for development.
 
 ### 4. Run locally
 
@@ -65,6 +69,8 @@ The workflow runs daily at ~9 AM EDT via `.github/workflows/daily_scrape.yml`. L
 | `GMAIL_ADDRESS` | Gmail address to send from |
 | `GMAIL_APP_PASSWORD` | Gmail app password |
 | `EMAIL_RECIPIENT` | Email address to send the digest to |
+| `TURSO_DATABASE_URL` | Turso database URL (`libsql://...`) |
+| `TURSO_AUTH_TOKEN` | Turso database auth token |
 
 Add them at **Settings → Secrets and variables → Actions**.
 
@@ -80,17 +86,19 @@ Add them at **Settings → Secrets and variables → Actions**.
 
 - **Board coverage is manually curated** — only companies listed in the board dicts are scraped, so you'll miss roles at companies you haven't added.
 - **LLM judgments aren't perfectly deterministic** — even at `temperature=0` the model can occasionally vary. The mandatory location gate and dealbreaker rules reduce this, but a borderline call may flip run-to-run.
-- **SQLite doesn't persist across GitHub Actions runs** — `jobs.db` is rebuilt each run since the Actions runner is ephemeral. Only `seen_jobs.json` persists (committed back to the repo).
+- **External database dependency** — state lives in Turso, so a run fails if Turso is unreachable. (A local `jobs.db` fallback is used only for development when the Turso vars are unset.)
 - **Descriptions are truncated** — only the first ~3000 characters of each posting are sent to the model, so requirements buried deep in a long description may be missed.
 - **GitHub Actions scheduler lag** — scheduled runs can be delayed 15–30 minutes during peak hours.
 
 ## Next steps
 
-- **Add more job sources** — Workday and direct company career pages would increase coverage beyond Greenhouse/Lever/Ashby
-- **Persist the database** — store `jobs.db` in a persistent store (e.g. Supabase) so scores and history accumulate across runs
-- **Surface the rich ATS output** — the model already returns per-requirement evidence and category scores; storing and displaying them would make the digest far more informative
-- **Build a review UI** — a lightweight web app to browse scored jobs, mark applied/rejected, and feed that back into scoring
-- **Slack/SMS notifications** — send the digest to Slack or via SMS (Twilio) as an alternative to email
+- **Web UI for custom inputs** — a small app (likely Supabase Postgres + its auto REST API) so the search can be tuned beyond just the resume: skills, preferred locations, seniority, must-haves.
+- **Lightweight interim view** — a GitHub Pages page listing matched jobs with links/scores, as a quick alternative to a full app.
+- **Referral finder** — surface potential referral connections (e.g. LinkedIn contacts) at companies with matched roles.
+- **Surface the rich ATS output** — the model already returns per-requirement evidence and category scores; storing and displaying them would make the digest far more informative.
+- **Use the posted date** — now that `date_posted` is stored, filter out stale listings or show "posted N days ago" in the digest.
+- **Add more job sources** — Workday and direct company career pages would increase coverage beyond Greenhouse/Lever/Ashby.
+- **Slack/SMS notifications** — send the digest to Slack or via SMS (Twilio) as an alternative to email.
 
 ## Project structure
 
@@ -99,8 +107,7 @@ main.py          # orchestrates the pipeline (scrape → score → email)
 scraper.py       # scrapes Greenhouse / Lever / Ashby boards + cheap pre-filter
 scorer.py        # ATS-style screening & 0–100 scoring with GPT-4o
 emailer.py       # builds and sends the HTML email digest
-database.py      # SQLite helpers (jobs.db)
+database.py      # Turso/libSQL helpers (local jobs.db fallback for dev)
 resume.txt       # your resume (used for scoring)
-seen_jobs.json   # tracks already-emailed job URLs
 .env.example     # template for required environment variables
 ```
