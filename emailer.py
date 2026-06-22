@@ -15,10 +15,10 @@ def build_html(jobs):
     cards = ""
     for job in jobs:
         score = job.get("score") or 0
-        if score >= 7:
+        if score >= 70:
             badge_color = "#065f46"
             badge_bg = "#d1fae5"
-        elif score >= 4:
+        elif score >= 40:
             badge_color = "#92400e"
             badge_bg = "#fef3c7"
         else:
@@ -28,12 +28,18 @@ def build_html(jobs):
         cards += f"""
         <div style="background:#fff;border-radius:10px;padding:20px 24px;margin-bottom:16px;
                     box-shadow:0 1px 4px rgba(0,0,0,0.08);">
-          <div style="display:flex;align-items:center;gap:12px;margin-bottom:6px;flex-wrap:wrap;">
-            <span style="font-size:16px;font-weight:600;color:#111;">{job['title']}</span>
-            <span style="font-size:13px;color:#555;">{job['company']}</span>
-            <span style="font-size:12px;font-weight:700;padding:3px 10px;border-radius:20px;
-                         background:{badge_bg};color:{badge_color};">{score}/10</span>
-          </div>
+          <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="margin-bottom:8px;">
+            <tr>
+              <td style="font-size:16px;font-weight:600;color:#111;vertical-align:middle;">
+                {job['title']}
+              </td>
+              <td align="right" style="vertical-align:middle;white-space:nowrap;padding-left:12px;">
+                <span style="font-size:12px;font-weight:700;padding:3px 10px;border-radius:20px;
+                             background:{badge_bg};color:{badge_color};">{score}/100</span>
+              </td>
+            </tr>
+          </table>
+          <div style="font-size:13px;color:#555;margin-bottom:2px;">{job['company']}</div>
           <div style="font-size:12px;color:#888;margin-bottom:8px;">{job.get('location','')}</div>
           <div style="font-size:14px;color:#444;line-height:1.5;margin-bottom:14px;">
             {job.get('summary') or '<em>No summary available.</em>'}
@@ -93,8 +99,9 @@ def send_digest(jobs):
 
 if __name__ == "__main__":
     # Quick test: send with whatever is in the DB today
-    from database import get_top_jobs_today
-    jobs = get_top_jobs_today(5)
+    from database import get_top_jobs_today, get_all_jobs
+    #jobs = get_top_jobs_today(5)
+    jobs = get_all_jobs()
     if jobs:
         send_digest(jobs)
     else:

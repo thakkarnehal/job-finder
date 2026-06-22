@@ -1,46 +1,47 @@
 NEHAL THAKKAR
 WORK EXPERIENCE
-JP Morgan Chase & Co                                                          Newark, DE
-AI & Data Science Analyst                                             September 2024–Present
-▪ Architected a prototype of a multi-agent LLM system (Google ADK) integrating Confluence, Jira, and Databricks MCP Servers to automate data quality triage for 3+ controller teams demonstrating reduction of manual investigation time by ~60%
-▪ Engineered anomaly detection models (Isolation Forest, Autoencoder, LOF) on a production Databricks pipeline (Spark, MLflow), enabling real-time monitoring of 10M+ daily OTC derivative trades for regulatory reporting consumption
-▪ Partnered cross-functionally with business and technology teams to refine feature engineering and training data through statistical analysis, and feedback loops — driving a 40% precision improvement
-▪ Spearheaded pivot to a hybrid rules + ML pipeline, codifying stakeholder thresholds and rebuilding training data from single-day snapshots to cross-year datasets to reduce false positives by 80% and surface critical issues
-▪ Implemented a reusable Databricks remediation workflow (PySpark, SQL) to surface data quality defects 3 steps earlier in regulatory reporting pipelines, reducing downstream issue escalation and manual review
-
-AI & Data Science Summer Analyst                                     June 2023–August 2023
-▪ Built a Python time-series anomaly detection pipeline using an ensemble of 6 statistical and ML models with a voting mechanism to monitor 10M+ daily derivatives notional records
-▪ Evaluated models (incl. ARIMA) under sparse anomaly conditions and refined detection logic through error analysis and domain learning, reducing noisy anomaly signals by ~20%
-
-Verizon                                                                   Basking Ridge, NJ
-Data Science Intern                                                  June 2022–August 2022
-▪ Implemented Random Forest for anomaly detection and KMeans/DBSCAN for fault-type clustering on 100K+ wireless KPI records, achieving 84% accuracy across 5+ antenna faults
-▪ Uncovered labeling errors through ML-driven analysis, correcting 5% of records to improve training data quality and reduce propagation of labeling noise into downstream models
-
-Rutgers University Interdisciplinary Research Team                      New Brunswick, NJ
-Research Intern                                                  September 2021–May 2022
-▪ Engineered a Python web scraping pipeline (urllib, BeautifulSoup) to automate extraction and structuring of data from 10+ nested pages via DOM traversal, enabling a reusable data ingestion workflow that eliminated manual collection
-▪ Led a 6-person team to design and deliver a conversational system, coordinating task delegation and integrating components across workstreams
-
-EDUCATION
-
-Rutgers University, School of Arts and Sciences – New Brunswick, NJ
-B.S. Computer Science, Certificate in Data Science | Summa Cum Laude
-Honors: Rutgers Honors Program, Dean's List (all semesters)
-Study Abroad: Yonsei University - Seoul, Korea
+JP Morgan Chase & Co
+Newark, DE
+Data Scientist 
+September 2024–Present
+Architected a prototype supervisor multi-agent LLM system (Google ADK), setting up Confluence, Jira, and Databricks MCP servers to automate data quality triage for 3+ controller teams, demonstrating a reduction of manual investigation time by ~60%
+Built a multi-agent LLM tool (Google ADK) to autonomously parse, transform, and migrate 100+ legacy validation rules to a production XML/SQL business rule engine via API, saving 150+ hours of manual effort
+Engineered 3 anomaly detection models (Isolation Forest, Autoencoder, LOF) on a production Databricks pipeline (Spark, MLflow), enabling near real-time monitoring of 10M+ daily OTC derivative trades for regulatory reporting consumption
+Drove 40% precision improvement partnering cross-functionally with business and technology teams to refine feature engineering and training data for anomaly detection through statistical analysis, and feedback loops
+Implemented a reusable Databricks remediation workflow (PySpark, SQL) to surface data quality defects 3 steps earlier in regulatory reporting pipelines, reducing duplicated downstream consumer issue escalations and manual review
+JP Morgan Chase & Co
+AI & Data Science Intern
+June 2023–August 2023
+Built a Python time-series anomaly detection pipeline using an ensemble of 6 statistical and ML models with a majority voting mechanism to monitor 10M+ daily derivative records
+Evaluated models (incl. ARIMA) under sparse anomaly conditions and refined detection logic through error analysis and domain learning, reducing noisy anomaly signals by ~20%
+Verizon
+Basking Ridge, NJ
+Data Science Intern
+June 2022–August 2022
+Implemented Random Forest for anomaly detection and KMeans/DBSCAN for fault-type clustering on 100K+ wireless KPI records, achieving 84% accuracy across 5+ antenna faults
+Uncovered labeling errors through ML-driven analysis, correcting 5% of records to improve training data quality and reduce propagation of labeling noise into downstream models
+Rutgers University Interdisciplinary Research Team
+New Brunswick, NJ
+Research Intern
+September 2021–May 2022
+Engineered a Python web scraping pipeline (Urllib, BeautifulSoup) to automate extraction and structuring of data from 10+ nested pages via DOM traversal, enabling a reusable data ingestion workflow that eliminated manual collection
+Led a 6-person team to design and deliver a conversational system, coordinating task delegation and integrating components across workstreams to help students plan classes more effectively 
 
 PERSONAL DEVELOPMENT PROJECTS
-
-Flight Recommender System                                                            2026
-▪ Engineered a Neural Collaborative Filtering recommender system in PyTorch (HR@10: 1.0, NDCG@10: 0.591), modeling user preference and flight delay risk from 1 years of BTS data; deployed via FastAPI, Docker, and AWS
-
+Flight Recommender System 
+Engineered a Neural Collaborative Filtering recommender system in PyTorch (HR@10: 0.617, NDCG@10: 0.322, Delay AUC: 0.818), modeling user preference and flight delay risk from 14M BTS flights; deployed via FastAPI, Docker, and AWS EC2
 LLM-Powered Job Match Engine
-▪ Built an automated Python pipeline that scrapes LinkedIn and Greenhouse, filters by keyword rules, and scores each role against my resume via the Claude API — deployed on GitHub Actions to deliver a ranked job digest daily
+Built a Python pipeline that scrapes LinkedIn, Indeed, and Greenhouse via Playwright and REST APIs, scores roles against a resume with GPT-4o-mini, and delivers a daily ranked email digest via GitHub Actions
+AI or Genuine Review Detector 
+Fine-tuned DistilBERT (PyTorch + HuggingFace) on ~10k restaurant reviews to detect AI-generated fakes; deployed via FastAPI + Docker on AWS ECS Fargate with a Chrome extension for real-time detection and adjusted rating overlays
 
-AI or Genuine Review Detector
-▪ Trained a PyTorch DistilBERT classifier to detect AI-generated restaurant reviews (99.6% accuracy), deployed as a Chrome extension via FastAPI and Docker on AWS with real-time detection and adjusted rating overlays
+EDUCATION
+Rutgers University, School of Arts and Sciences – New Brunswick, NJ
+B.S. Computer Science, Certificate in Data Science | Summa Cum Laude
+Honors: Rutgers Honors Program, Dean’s List (all semesters)
+Study Abroad: Yonsei University - Seoul, Korea
 
 SKILLS & TECHNOLOGIES
 Languages: Python, SQL, R, Java
-ML & AI: scikit-learn, Isolation Forest, Autoencoders, LOF, LLMs (Claude, OpenAI), Google ADK, LangChain, PyTorch, Pandas
-Tools: Databricks, Spark, MLflow (MLOps), FastAPI, Docker, AWS, GitHub
+ML & AI: scikit-learn, Isolation Forest, Autoencoders, LOF, Google ADK, LangChain, PyTorch, Pandas
+Tools:  Databricks, Spark, MLflow (MLOps), FastAPI, Docker, AWS, GitHub

@@ -41,7 +41,7 @@ def main():
 
     seen_urls = load_seen_urls()
     all_jobs_today = get_top_jobs_today(n=50)
-    new_jobs = [j for j in all_jobs_today if j["url"] not in seen_urls]
+    new_jobs = [j for j in all_jobs_today if j["url"] not in seen_urls and j['score'] >= 60]
 
     if not new_jobs:
         print("No new jobs since last run — skipping email.")
@@ -50,7 +50,7 @@ def main():
     top_new = new_jobs[:5]
     print(f"  {len(new_jobs)} new jobs found, emailing top {len(top_new)}:")
     for job in top_new:
-        print(f"    {job['score']}/10 — {job['title']} at {job['company']}")
+        print(f"    {job['score']}/100 — {job['title']} at {job['company']}")
 
     try:
         send_digest(top_new)
