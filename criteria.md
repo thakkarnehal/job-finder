@@ -14,7 +14,9 @@ recruiter would: is this a true blocker, or just a gap that weakens the applicat
 A job is ineligible only if it REQUIRES something the candidate clearly does not meet:
 - **Experience:** requires meaningfully more experience than the résumé shows — as a rule of thumb,
   roughly 2+ years beyond the candidate's total. A gap of about a year or less is a soft factor, not
-  a dealbreaker.
+  a dealbreaker. When the experience requirement is **conditional on degree** (e.g. "5+ years with a
+  BS/Master's, 2+ years with a PhD"), apply the threshold for the candidate's ACTUAL highest completed
+  degree. Do NOT credit a lower threshold that is gated behind a degree the candidate doesn't hold.
 - **Degree:** requires a degree the candidate has not completed, with no "or equivalent experience"
   path the candidate plausibly satisfies.
 - **Level:** targets a seniority clearly above the candidate (e.g. Senior/Staff/Principal/Lead/
