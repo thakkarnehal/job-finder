@@ -198,13 +198,19 @@ def get_jobs_today():
     )))
 
 
-def get_jobs_to_email(min_score, limit=5):
-    """Return jobs that cleared the score floor and haven't been emailed yet."""
-    return _run(lambda c: _rows(c.execute(
-        "SELECT * FROM jobs WHERE score >= ? AND emailed = 0 AND eligible = 1 "
-        "ORDER BY score DESC LIMIT ?",
-        (min_score, limit),
-    )))
+def get_jobs_to_email(min_score, limit=None):
+    """Return jobs that cleared the score floor and haven't been emailed yet.
+
+    With limit=None (the default) every qualifying job is returned, highest score
+    first; pass an int to cap the number.
+    """
+    sql = ("SELECT * FROM jobs WHERE score >= ? AND emailed = 0 AND eligible = 1 "
+           "ORDER BY score DESC")
+    params = [min_score]
+    if limit is not None:
+        sql += " LIMIT ?"
+        params.append(limit)
+    return _run(lambda c: _rows(c.execute(sql, tuple(params))))
 
 
 def mark_emailed(job_ids):

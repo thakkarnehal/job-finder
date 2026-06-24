@@ -41,7 +41,7 @@ def main():
     print("STEP 3: Sending email digest")
     print("=" * 60)
 
-    top_new = get_jobs_to_email(MIN_SCORE, limit=5)
+    top_new = get_jobs_to_email(MIN_SCORE)   # no cap — send every eligible job >= MIN_SCORE
 
     if not top_new:
         print("No new jobs above the score floor — skipping email.")
